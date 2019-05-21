@@ -8,7 +8,7 @@
 typedef union{
     int type_int;
     char type_id[33];
-    PEXP *pexp;
+    NODE *pnode;
 }YYLVAL;
 #define YYSTYPE YYLVAL
 %}

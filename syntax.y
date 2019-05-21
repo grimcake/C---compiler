@@ -9,10 +9,10 @@
 %union {
     int type_int;
     char type_id[33];
-    struct Exp *pExp;
+    struct node *pnode;
 };
 
-%type <pExp> Exp
+%type <pnode> Exp
 %token TYPE
 %token PLUS MINUS STAR DIV ASSIGNOP RELOP
 %token AND OR NOT
@@ -103,23 +103,23 @@ Dec : VarDec
 /*
  * Expressions
  */
-Exp : Exp ASSIGNOP Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=ASSIGNOP_NODE; $$->pExp1=$1; $$->pExp2=$3;}
+Exp : Exp ASSIGNOP Exp 
     | Exp AND Exp
     | Exp OR Exp
     | Exp RELOP Exp
-    | Exp PLUS Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=PLUS_NODE; $$->pExp1=$1; $$->pExp2=$3;}
-    | Exp MINUS Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=MINUS_NODE; $$->pExp1=$1; $$->pExp2=$3;}
-    | Exp STAR Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=STAR_NODE; $$->pExp1=$1; $$->pExp2=$3;}
-    | Exp DIV Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=DIV_NODE; $$->pExp1=$1; $$->pExp2=$3;}
-    | LP Exp RP {$$=(PEXP)$2;}
+    | Exp PLUS Exp 
+    | Exp MINUS Exp 
+    | Exp STAR Exp 
+    | Exp DIV Exp 
+    | LP Exp RP 
     | MINUS Exp
     | NOT Exp
     | ID LP Args RP
     | ID LP RP
     | Exp LB Exp RB
     | Exp DOT ID
-    | ID  {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=ID_NODE; strcpy($$->type_id, $1);} 
-    | INT {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=INT_NODE; $$->type_int=$1;} 
+    | ID  
+    | INT 
     ;
 Args : Exp COMMA Args
     | Exp
