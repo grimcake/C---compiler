@@ -19,7 +19,7 @@
 %token SEMI COMMA DOT
 %token LP RP LB RB LC RC
 %token STRUCT IF ELSE WHILE RETURN
-%token <type_int> ID
+%token <type_id> ID
 %token <type_int> INT
 
 %%
@@ -103,7 +103,7 @@ Dec : VarDec
 /*
  * Expressions
  */
-Exp : Exp ASSIGNOP Exp
+Exp : Exp ASSIGNOP Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=ASSIGNOP_NODE; $$->pExp1=$1; $$->pExp2=$3;}
     | Exp AND Exp
     | Exp OR Exp
     | Exp RELOP Exp

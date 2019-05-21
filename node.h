@@ -6,6 +6,7 @@ enum node_kind{
     MINUS_NODE,
     STAR_NODE,
     DIV_NODE,
+    ASSIGNOP_NODE
 };
 
 typedef struct Exp {

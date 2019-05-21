@@ -171,7 +171,7 @@ WHILE "while"
 
 {ID} {
     strcpy(yylval.type_id, yytext);
-    printf("ID\n");
+    printf("ID %s %s\n", yylval.type_id, yytext);
     return ID;
 }
 
