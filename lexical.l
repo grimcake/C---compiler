@@ -1,5 +1,16 @@
 %{
 #include "syntax.tab.h"
+#ifndef _NODE_H_
+#define _NODE_H_
+#include "node.h"
+#endif
+
+typedef union{
+    int type_int;
+    char type_id[33];
+    PEXP *pexp;
+}YYLVAL;
+#define YYSTYPE YYLVAL
 %}
 
 INT [0-9]+
@@ -128,7 +139,7 @@ WHILE "while"
 
 
 {INT} {
-    yylval = atoi(yytext);
+    yylval.type_int = atoi(yytext);
     printf("INT\n");
     return INT;
 }
@@ -159,6 +170,7 @@ WHILE "while"
 }
 
 {ID} {
+    strcpy(yylval.type_id, yytext);
     printf("ID\n");
     return ID;
 }

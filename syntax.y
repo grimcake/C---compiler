@@ -1,32 +1,28 @@
 %{
-
+#ifndef _NODE_H_
+#define _NODE_H_
+#include "node.h"
+#endif
+#include <stdlib.h>
 %}
 
-%token INT TYPE
+%union {
+    int type_int;
+    char type_id[33];
+    struct Exp *pExp;
+};
+
+%type <pExp> Exp
+%token TYPE
 %token PLUS MINUS STAR DIV ASSIGNOP RELOP
 %token AND OR NOT
 %token SEMI COMMA DOT
 %token LP RP LB RB LC RC
 %token STRUCT IF ELSE WHILE RETURN
-%token ID
+%token <type_int> ID
+%token <type_int> INT
 
 %%
-/*
-Calc :
-    | Exp {printf("= %d\n", $1); }
-    ;
-Exp : Factor
-    | Exp PLUS Factor{$$ = $1+$3; }
-    | Exp MINUS Factor{$$ = $1-$3; }
-    ;
-Factor : Term
-    | Factor STAR Term { $$ = $1*$3; }
-    | Factor DIV Term { $$ = $1/$3; }
-    ;
-Term : INT
-    ;
-*/
-
 /*
  * High-level Definitions
  */
@@ -111,19 +107,19 @@ Exp : Exp ASSIGNOP Exp
     | Exp AND Exp
     | Exp OR Exp
     | Exp RELOP Exp
-    | Exp PLUS Exp
-    | Exp MINUS Exp
-    | Exp STAR Exp
-    | Exp DIV Exp
-    | LP Exp RP
+    | Exp PLUS Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=PLUS_NODE; $$->pExp1=$1; $$->pExp2=$3;}
+    | Exp MINUS Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=MINUS_NODE; $$->pExp1=$1; $$->pExp2=$3;}
+    | Exp STAR Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=STAR_NODE; $$->pExp1=$1; $$->pExp2=$3;}
+    | Exp DIV Exp {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=DIV_NODE; $$->pExp1=$1; $$->pExp2=$3;}
+    | LP Exp RP {$$=(PEXP)$2;}
     | MINUS Exp
     | NOT Exp
     | ID LP Args RP
     | ID LP RP
     | Exp LB Exp RB
     | Exp DOT ID
-    | ID
-    | INT
+    | ID  {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=ID_NODE; strcpy($$->type_id, $1);} 
+    | INT {$$=(PEXP)malloc(sizeof(struct Exp)); $$->kind=INT_NODE; $$->type_int=$1;} 
     ;
 Args : Exp COMMA Args
     | Exp
