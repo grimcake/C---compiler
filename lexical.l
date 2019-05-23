@@ -58,6 +58,7 @@ WHILE "while"
 }
 
 {RELOP} {
+    strcpy(yylval.type_id, yytext);
     printf("RELOP\n");
     return RELOP;
 }
@@ -133,7 +134,8 @@ WHILE "while"
 }
 
 {TYPE} {
-    printf("TYPE\n");
+    strcpy(yylval.type_id, yytext);
+    printf("TYPE %s\n", yylval.type_id);
     return TYPE;
 }
 
@@ -171,7 +173,7 @@ WHILE "while"
 
 {ID} {
     strcpy(yylval.type_id, yytext);
-    printf("ID %s %s\n", yylval.type_id, yytext);
+    printf("ID %s\n", yylval.type_id);
     return ID;
 }
 
