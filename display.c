@@ -97,7 +97,7 @@ void display(NODE T, int indent){
             display(T->ptr[1], indent+3);
             break;
         case DEC_LIST_NODE:
-            printf("%*c variable name:\n", indent, ' ');
+            printf("%*c variable list:\n", indent, ' ');
             struct node * T0;
             T0 = T;
             while(T0){
@@ -124,11 +124,12 @@ void display(NODE T, int indent){
         case MINUS_NODE:
         case STAR_NODE:
         case DIV_NODE:
-            printf("%*c%s\n", indent, ' ', T->type_id);
+            printf("%*c %s\n", indent, ' ', T->type_id);
             display(T->ptr[0], indent+3);
             display(T->ptr[1], indent+3);
             break;
-    
+        default:
+            break;
         }
 
     }

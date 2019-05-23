@@ -54,6 +54,7 @@ WHILE "while"
 
 {ASSIGNOP} {
     printf("ASSIGN\n");
+    strcpy(yylval.type_id, yytext);
     return ASSIGNOP;
 }
 
@@ -65,21 +66,25 @@ WHILE "while"
 
 {PLUS} {
     printf("PLUS\n");
+    strcpy(yylval.type_id, yytext);
     return PLUS;
 }
 
 {MINUS} {
     printf("MINUS\n");
+    strcpy(yylval.type_id, yytext);
     return MINUS;
 }
 
 {STAR} {
     printf("STAR\n");
+    strcpy(yylval.type_id, yytext);
     return STAR;
 }
 
 {DIV} {
     printf("DIV\n");
+    strcpy(yylval.type_id, yytext);
     return DIV;
 }
 

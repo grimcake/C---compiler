@@ -14,7 +14,7 @@
 
 %type <pnode> program ExtDefList ExtDef Specifier ExtDecList FunDec CompSt VarList VarDec ParamDec Stmt StmtList DefList Def DecList Dec Exp Args 
 %token <type_id> TYPE
-%token PLUS MINUS STAR DIV ASSIGNOP RELOP
+%token <type_id> PLUS MINUS STAR DIV ASSIGNOP RELOP
 %token AND OR NOT
 %token SEMI COMMA DOT
 %token LP RP LB RB LC RC
@@ -49,7 +49,7 @@ StructSpecifier : STRUCT OptTag LC DefList RC
     | STRUCT Tag
     ;
 OptTag : ID
-    |
+    | 
     ;
 Tag :ID
     ;
@@ -72,17 +72,17 @@ ParamDec : Specifier VarDec {$$ = (struct node*)malloc(sizeof(struct node)); $$-
 /*
  * Statements
  */
-CompSt : LC DefList StmtList RC {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = COMP_STM_NODE; $$->ptr[0] = $2; $$->ptr[1] = $3;}
+CompSt : LC DefList StmtList RC {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = COMP_STM_NODE; $$->ptr[0] = $2; $$->ptr[1] = $3;printf("??\n");}
     ;
 StmtList : Stmt StmtList {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = STM_LIST_NODE; $$->ptr[0] = $1; $$->ptr[1] = $2;}
-    |
+    | {$$=NULL;}
     ;
 Stmt : Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = EXP_STMT_NODE; $$->ptr[0] = $1;}
-    | CompSt {$$=$1;}
+    | CompSt {$$=$1;  printf("!\n");}
     | RETURN Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = RETURN_NODE; $$->ptr[0] = $2;}
     | IF LP Exp RP Stmt
     | IF LP Exp RP Stmt ELSE Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = IF_THEN_ELSE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5; $$->ptr[2] = $7;}
-    | WHILE LP Exp RP Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = WHILE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5;}
+    | WHILE LP Exp RP Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = WHILE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5;printf("~\n");}
     ;
 
 /*
@@ -103,14 +103,14 @@ Dec : VarDec {$$=$1;}
 /*
  * Expressions
  */
-Exp : Exp ASSIGNOP Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = ASSIGNOP_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;}
+Exp : Exp ASSIGNOP Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = ASSIGNOP_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);}
     | Exp AND Exp 
     | Exp OR Exp
     | Exp RELOP Exp
-    | Exp PLUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = PLUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;} 
-    | Exp MINUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = MINUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;} 
-    | Exp STAR Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = STAR_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3; } 
-    | Exp DIV Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = DIV_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;} 
+    | Exp PLUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = PLUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);} 
+    | Exp MINUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = MINUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);} 
+    | Exp STAR Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = STAR_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3; strcpy($$->type_id, $2);} 
+    | Exp DIV Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = DIV_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);} 
     | LP Exp RP 
     | MINUS Exp
     | NOT Exp
