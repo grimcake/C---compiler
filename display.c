@@ -117,6 +117,7 @@ void display(NODE T, int indent){
         case INT_NODE:
             printf("%*c INT: %d\n", indent, ' ', T->type_int);
             break;
+        case RELOP_NODE:
         case ASSIGNOP_NODE:
         case AND_NODE:
         case OR_NODE:

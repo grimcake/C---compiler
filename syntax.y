@@ -106,7 +106,7 @@ Dec : VarDec {$$=$1;}
 Exp : Exp ASSIGNOP Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = ASSIGNOP_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);}
     | Exp AND Exp 
     | Exp OR Exp
-    | Exp RELOP Exp
+    | Exp RELOP Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = RELOP_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3; strcpy($$->type_id, $2);}
     | Exp PLUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = PLUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);} 
     | Exp MINUS Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = MINUS_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;strcpy($$->type_id, $2);} 
     | Exp STAR Exp {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = STAR_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3; strcpy($$->type_id, $2);} 
