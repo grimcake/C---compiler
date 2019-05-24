@@ -12,13 +12,22 @@ enum Symtable_kind{
     FUNCTION
 };
 
-typedef struct{
+struct s_data{    
     char s_name[33];
     int s_kind;
     int s_level;
     int s_offset;
-}Symtable;
+    struct s_data* next;
+};
 
-void SymtableCreate(Symtable *s, char name[], int kind, int level, int offset);
+struct Symtable{
+    struct s_data* data;
+    struct s_data* head;
+    struct s_data* tail;
+};
+
+struct Symtable* SymtableCreate();
+void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset);
+void SymtableOutput(struct Symtable *s);
 
 
