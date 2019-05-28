@@ -1,3 +1,5 @@
+%x COMMENT
+
 %{
 #include "syntax.tab.h"
 #ifndef _NODE_H_
@@ -41,18 +43,25 @@ ELSE "else"
 WHILE "while"
 
 %%
+"//".* {}
+"/*" {BEGIN COMMENT;}
+<COMMENT>"*/" {BEGIN INITIAL;}
+
 
 {SEMI} {
+    printf("%s ", yytext);
     printf("SEMI\n");
     return SEMI;
 }
 
 {COMMA} {
+    printf("%s ", yytext);
     printf("COMMA\n");
     return COMMA;
 }
 
 {ASSIGNOP} {
+    printf("%s ", yytext);
     printf("ASSIGN\n");
     strcpy(yylval.type_id, yytext);
     return ASSIGNOP;
@@ -60,132 +69,156 @@ WHILE "while"
 
 {RELOP} {
     strcpy(yylval.type_id, yytext);
+    printf("%s ", yytext);
     printf("RELOP\n");
     return RELOP;
 }
 
 {PLUS} {
+    printf("%s ", yytext);
     printf("PLUS\n");
     strcpy(yylval.type_id, yytext);
     return PLUS;
 }
 
 {MINUS} {
+    printf("%s ", yytext);
     printf("MINUS\n");
     strcpy(yylval.type_id, yytext);
     return MINUS;
 }
 
 {STAR} {
+    printf("%s ", yytext);
     printf("STAR\n");
     strcpy(yylval.type_id, yytext);
     return STAR;
 }
 
 {DIV} {
+    printf("%s ", yytext);
     printf("DIV\n");
     strcpy(yylval.type_id, yytext);
     return DIV;
 }
 
 {AND} {
+    printf("%s ", yytext);
     printf("AND\n");
     return AND;
 }
 
 {OR} {
+    printf("%s ", yytext);
     printf("OR\n");
     return OR;
 }
 
 {DOT} {
+    printf("%s ", yytext);
     printf("DOT\n");
     return DOT;
 }
 
 {NOT} {
+    printf("%s ", yytext);
     printf("NOT\n");
     return NOT;
 }
 
 {LP} {
+    printf("%s ", yytext);
     printf("LP\n");
     return LP;
 }
 
 {RP} {
+    printf("%s ", yytext);
     printf("RP\n");
     return RP;
 }
 
 {LB} {
+    printf("%s ", yytext);
     printf("LB\n");
     return LB;
 }
 
 {RB} {
+    printf("%s ", yytext);
     printf("RB\n");
     return RB;
 }
 
 {LC} {
+    printf("%s ", yytext);
     printf("LC\n");
     return LC;
 }
 
 {RC} {
+    printf("%s ", yytext);
     printf("RC\n");
     return RC;
 }
 
 {TYPE} {
     strcpy(yylval.type_id, yytext);
-    printf("TYPE %s\n", yylval.type_id);
+    printf("%s ", yytext);
+    printf("TYPE\n");
     return TYPE;
 }
 
 
 {INT} {
     yylval.type_int = atoi(yytext);
+    printf("%s ", yytext);
     printf("INT\n");
     return INT;
 }
 
 {STRUCT} {
+    printf("%s ", yytext);
     printf("STRUCT\n");
     return STRUCT;
 }
 
 {IF} {
+    printf("%s ", yytext);
     printf("IF\n");
     return IF;
 }
 
 {ELSE} {
+    printf("%s ", yytext);
     printf("ELSE\n");
     return ELSE;
 }
 
 {WHILE} {
+    printf("%s ", yytext);
     printf("WHILE\n");
     return WHILE;
 }
 
 {RETURN} {
+    printf("%s ", yytext);
     printf("RETURN\n");
     return RETURN;
 }
 
 {ID} {
     strcpy(yylval.type_id, yytext);
-    printf("ID %s\n", yylval.type_id);
+    printf("%s ", yytext);
+    printf("ID\n");
     return ID;
 }
 
 \n {
 }
 
-[ \t]+ {
+
+[ \r\t]+ {
 
 }
 

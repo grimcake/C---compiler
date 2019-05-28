@@ -6,7 +6,8 @@ static void stackGrow(Stack *s){
     s->element = realloc(s->element, s->allocLength*s->elemSize);
 }
 
-void stackCreate(Stack* s, int elemSize){
+Stack* stackCreate(int elemSize){
+    Stack* s = (Stack *)malloc(sizeof(Stack));
     s->elemSize = elemSize;
     s->elemNum = 0;
     s->allocLength = 4;
@@ -14,6 +15,7 @@ void stackCreate(Stack* s, int elemSize){
     if(s->element == NULL){
         printf("malloc error\n");
     }
+    return s;
 }
 
 void stackDestroy(Stack* s){
@@ -43,13 +45,13 @@ void stackPop(Stack* s, void* element){
 }
 
 
-
-/*int main(){
-    Stack* s;
-    stackCreate(s, sizeof(int));
+/*
+int main(){
+    Stack* s = NULL;
+    s = stackCreate(sizeof(int));
     int k = 12;
     stackPush(s, &k);
-    int num;
+    int num = 3;
     stackPop(s, &num);
     stackPop(s, &num);
     stackPop(s, &num);

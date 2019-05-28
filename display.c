@@ -1,11 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef _NODE_H_
-#define _NODE_H_
-#include "node.h"
-#endif
-
+#include "display.h"
 
 void display(NODE T, int indent){
     //printf(" %d\n", T->kind);

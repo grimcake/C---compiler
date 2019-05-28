@@ -1,8 +1,6 @@
 %{
-#ifndef _NODE_H_
-#define _NODE_H_
 #include "node.h"
-#endif
+#include "symtable.h"
 #include <stdlib.h>
 %}
 
@@ -26,7 +24,7 @@
 /*
  * High-level Definitions
  */
-Program : ExtDefList {display($1, 0); }
+Program : ExtDefList {display($1, 0); ASTroot = $1; }
     ;
 ExtDefList : ExtDef ExtDefList {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = EXT_DEF_LIST_NODE; $$->ptr[0] = $1; $$->ptr[1] = $2;}
     | {$$=NULL;}
@@ -42,7 +40,7 @@ ExtDecList : VarDec {$$=$1;}
 /*
  * Specifiers
  */
-Specifier : TYPE {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = TYPE_NODE; strcpy($$->type_id, $1);}
+Specifier : TYPE {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = TYPE_NODE; strcpy($$->type_id, $1); $$->type = (strcmp($$->type_id, "int") == 0)?S_INT:S_FLOAT; printf("hi %d\n", $$->type);}
     | StructSpecifier
     ;
 StructSpecifier : STRUCT OptTag LC DefList RC
@@ -57,7 +55,7 @@ Tag :ID
 /*
  * Declarators
  */
-VarDec : ID {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = ID_NODE; strcpy($$->type_id, $1);}
+VarDec : ID {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = ID_NODE; strcpy($$->type_id, $1); }
     | VarDec LB INT RB
     ;
 FunDec : ID LP VarList RP {$$ = (struct node*)malloc(sizeof(struct node)); $$->ptr[0] = $3; $$->kind = FUNC_DEC_NODE; strcpy($$->type_id, $1);}
@@ -72,7 +70,7 @@ ParamDec : Specifier VarDec {$$ = (struct node*)malloc(sizeof(struct node)); $$-
 /*
  * Statements
  */
-CompSt : LC DefList StmtList RC {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = COMP_STM_NODE; $$->ptr[0] = $2; $$->ptr[1] = $3;printf("??\n");}
+CompSt : LC DefList StmtList RC {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = COMP_STM_NODE; $$->ptr[0] = $2; $$->ptr[1] = $3;}
     ;
 StmtList : Stmt StmtList {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = STM_LIST_NODE; $$->ptr[0] = $1; $$->ptr[1] = $2;}
     | {$$=NULL;}
@@ -82,7 +80,7 @@ Stmt : Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = EXP_
     | RETURN Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = RETURN_NODE; $$->ptr[0] = $2;}
     | IF LP Exp RP Stmt
     | IF LP Exp RP Stmt ELSE Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = IF_THEN_ELSE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5; $$->ptr[2] = $7;}
-    | WHILE LP Exp RP Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = WHILE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5;printf("~\n");}
+    | WHILE LP Exp RP Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = WHILE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5;}
     ;
 
 /*

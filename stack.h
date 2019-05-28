@@ -1,18 +1,20 @@
+#ifndef _STACK_H
+#define _STACK_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
 
-typedef struct{
+typedef struct Stack{
     void* element;
     int elemSize;
     int allocLength;
     int elemNum;
 }Stack;
 
-void stackCreate(Stack* s, int elemSize);
+Stack* stackCreate(int elemSize);
 void stackDestroy(Stack* s);
 void stackPush(Stack* s, void* element);
 void stackPop(Stack* s, void* element);
 
-
+#endif
 

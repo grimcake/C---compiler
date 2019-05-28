@@ -1,3 +1,6 @@
+#ifndef _NODE_H
+#define _NODE_H
+
 enum node_kind{
     ID_NODE,
     INT_NODE,
@@ -40,4 +43,14 @@ typedef struct node {
     char type_id[33];
     int type_int;
     struct node* ptr[3];
-}*NODE;
+
+    int offset;
+    int width;
+    int type;
+
+    int num; //一次定义的数量，用于EXT_VAR_DEF_NODE
+}node, *NODE;
+
+NODE ASTroot;
+
+#endif
