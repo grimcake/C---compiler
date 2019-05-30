@@ -76,7 +76,7 @@ StmtList : Stmt StmtList {$$ = (struct node*)malloc(sizeof(struct node)); $$->ki
     | {$$=NULL;}
     ;
 Stmt : Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = EXP_STMT_NODE; $$->ptr[0] = $1;}
-    | CompSt {$$=$1;  printf("!\n");}
+    | CompSt {$$=$1;}
     | RETURN Exp SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = RETURN_NODE; $$->ptr[0] = $2;}
     | IF LP Exp RP Stmt
     | IF LP Exp RP Stmt ELSE Stmt {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = IF_THEN_ELSE_NODE; $$->ptr[0] = $3; $$->ptr[1] = $5; $$->ptr[2] = $7;}

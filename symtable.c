@@ -172,6 +172,9 @@ void Ast_To_Symtable(NODE T){
             T->width = T->ptr[1]->num*((T->type == S_INT)? 4:8);
             break;
         case EXP_STMT_NODE:
+            T->ptr[0]->offset = T->offset;
+            Ast_To_Symtable(T->ptr[0]);
+            T->width = T->ptr[0]->width;
             break;
         case RETURN_NODE:
             break;
@@ -180,13 +183,13 @@ void Ast_To_Symtable(NODE T){
             T->width = 0;
             if(T->ptr[0]){
                 T->ptr[0]->offset = T->offset;
-                T->width += T->ptr[0]->width;
-                if(LEV >= 1){
+                if(LEV > 1){
                     Symtable * new_table = SymtableCreate(); //创建新作用域符号表
                     stackPush(SymStack, new_table); //将符号表入栈
                     now_symtable = new_table;
                 }
                 local_var_list(T->ptr[0]);
+                T->width += T->ptr[0]->width;
             }
             if(T->ptr[1]){
                 T->ptr[1]->offset = T->offset+T->width;
@@ -197,10 +200,29 @@ void Ast_To_Symtable(NODE T){
             LEV--;
             break;
         case STM_LIST_NODE:
+            if(T->ptr[0] == NULL){
+                //空语句
+                T->width = 0;
+                break;
+            }
+            T->ptr[0]->offset = T->offset;
+            Ast_To_Symtable(T->ptr[0]);
+            T->width = T->ptr[0]->width;
+            if(T->ptr[1]){
+                T->ptr[1]->offset = T->offset+T->ptr[0]->width;
+                Ast_To_Symtable(T->ptr[1]);
+            }
             break;
         case WHILE_NODE:
+            T->ptr[0]->offset = T->ptr[1]->offset = T->offset;
+            T->width = T->ptr[0]->width;
+            Ast_To_Symtable(T->ptr[1]);
             break;
         case IF_THEN_ELSE_NODE:
+            T->ptr[1]->offset = T->offset;
+            T->ptr[2]->offset = T->offset;
+            Ast_To_Symtable(T->ptr[1]);
+            Ast_To_Symtable(T->ptr[2]);
             break;
         case DEF_LIST_NODE:
             break;
@@ -260,6 +282,7 @@ void local_var_list(node* T){
             if(!T->ptr[0]) break;
             T->ptr[0]->offset = T->offset;
             local_var_list(T->ptr[0]);
+            T->width += T->ptr[0]->width;
             if(T->ptr[1]){
                 T->ptr[1]->offset = T->ptr[0]->offset+T->ptr[0]->width;
                 local_var_list(T->ptr[1]);
@@ -286,8 +309,15 @@ void local_var_list(node* T){
             else{
                 T->num = T->ptr[0]->num;
             }
+            
+
             break;
         case ID_NODE:
+            //函数无参数，直接进入compst时没有创建符号表
+            if(now_symtable == NULL){
+                now_symtable = SymtableCreate();
+                stackPush(SymStack, now_symtable);
+            }
             SymtableInsert(now_symtable, T->type_id, K_VAL, LEV, T->offset, T->type);
             T->num = 1;
             break;
