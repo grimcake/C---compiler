@@ -3,18 +3,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
+#include "symtable.h"
+
+
+typedef struct StackElem{
+    Symtable* elem;
+    struct StackElem* pre;
+    struct StackElem* next;
+}StackElem;
 
 typedef struct Stack{
-    void* element;
-    int elemSize;
-    int allocLength;
+    StackElem* elem;
+    StackElem* top;
     int elemNum;
 }Stack;
 
-Stack* stackCreate(int elemSize);
+Stack* stackCreate();
 void stackDestroy(Stack* s);
-void stackPush(Stack* s, void* element);
-void stackPop(Stack* s, void* element);
+void stackPush(Stack* s, Symtable* element);
+Symtable* stackPop(Stack* s);
+void stackOutput(Stack *s);
+
 
 #endif
 

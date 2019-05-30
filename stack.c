@@ -1,60 +1,106 @@
 #include "stack.h"
 #include <string.h>
 
-static void stackGrow(Stack *s){
-    s->allocLength *= 2;
-    s->element = realloc(s->element, s->allocLength*s->elemSize);
-}
 
-Stack* stackCreate(int elemSize){
-    Stack* s = (Stack *)malloc(sizeof(Stack));
-    s->elemSize = elemSize;
+Stack* stackCreate(){
+    Stack* s = (Stack*)malloc(sizeof(Stack));
+    s->elem = NULL;
+    s->top = NULL;
     s->elemNum = 0;
-    s->allocLength = 4;
-    s->element = malloc(s->allocLength*s->elemSize);
-    if(s->element == NULL){
-        printf("malloc error\n");
-    }
     return s;
 }
 
 void stackDestroy(Stack* s){
-    free(s->element);
+    if(s == NULL) return;
+    StackElem* p = s->elem;
+    while(p){
+        StackElem* tmp = p;
+        p = p->next;
+        SymtableDestroy(tmp->elem);
+        free(tmp);
+    }
+    free(s);
 }
 
-void stackPush(Stack* s, void* element){
-    if(s->elemNum == s->allocLength){
-        stackGrow(s);
-        if(s->elemNum == s->allocLength){
-            printf("steckGrow error\n");
-        }
+void stackPush(Stack* s, Symtable* element){
+    if(s->elem == NULL){
+        s->elem = (StackElem*)malloc(sizeof(StackElem));
+        s->top = s->elem;
+        s->top->elem = element;
+        s->top->pre = NULL;
+        s->top->next = NULL;
     }
-    void* target = (char*)(s->element)+s->elemNum*s->elemSize;
-    memcpy(target, element, s->elemSize);
+    else{
+        s->top->next = (StackElem*)malloc(sizeof(StackElem));
+        s->top->next->pre = s->top;
+        s->top = s->top->next;
+        s->top->elem = element;
+        s->top->next = NULL;
+    }
     s->elemNum++;
 }
 
-void stackPop(Stack* s, void* element){
-    if(s->elemNum == 0){
-        printf("stack is empty\n");
-        return;
+Symtable* stackPop(Stack* s){
+    if(s->elemNum <= 0){
+        printf("stack is empty!\n");
+        return NULL;
     }
-    void* target = (char*)(s->element)+(s->elemNum-1)*s->elemSize;
-    memcpy(element, target, s->elemSize);
+    StackElem* topelem = s->top;
+    s->top = s->top->pre;
     s->elemNum--;
+    return topelem->elem;
 }
 
+/*
+ * 从栈底到栈顶打印内容
+ */
+
+void stackOutput(Stack *s){
+    StackElem *p = s->elem;
+    while(p!=NULL){
+       SymtableOutput(p->elem);
+       if(p == s->top) break;
+       p = p->next; 
+    }
+}
 
 /*
+typedef struct testnode{
+    void *elem;
+    int k;
+}testnode;
+
+
 int main(){
+    int i;
+    char c;
+    i = 333;
+    c = 'x';
+
+    void *f;
+    f = &i;
+    printf("%d\n", *(int*)f);
+
+    f = &c;
+    printf("%c\n", *(char*)f);
+    printf("%p \n", &i);
+    printf("%p \n", &c);
+    int g = 10, h = 12;
+
     Stack* s = NULL;
-    s = stackCreate(sizeof(int));
-    int k = 12;
-    stackPush(s, &k);
-    int num = 3;
-    stackPop(s, &num);
-    stackPop(s, &num);
-    stackPop(s, &num);
-    printf("%d\n", num);
+    s = stackCreate(sizeof(testnode));
+    testnode *p;
+    p = (testnode*)malloc(sizeof(testnode));
+    p->k = 333;
+    p->elem = (int *)malloc(sizeof(int));
+    p->elem = &g;
+    stackPush(s, p);
+
+    testnode* top = (testnode*)malloc(sizeof(testnode));
+    stackPop(s, top);
+    top->elem = &h;
+
+    printf("%d %d\n", top->k, *(int *)top->elem);
+    stackPop(s, top);
 
 }*/

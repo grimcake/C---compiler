@@ -91,7 +91,7 @@ DefList : Def DefList {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind 
     ;
 Def : Specifier DecList SEMI {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = VAR_DEF_NODE; $$->ptr[0] = $1; $$->ptr[1] = $2;}
     ;
-DecList : Dec {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = EXT_DEC_LIST_NODE; $$->ptr[0] = $1;}
+DecList : Dec {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = DEC_LIST_NODE; $$->ptr[0] = $1;}
     | Dec COMMA DecList {$$ = (struct node*)malloc(sizeof(struct node)); $$->kind = DEC_LIST_NODE; $$->ptr[0] = $1; $$->ptr[1] = $3;}
     ;
 Dec : VarDec {$$=$1;}

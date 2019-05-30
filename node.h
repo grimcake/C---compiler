@@ -49,6 +49,7 @@ typedef struct node {
     int type;
 
     int num; //一次定义的数量，用于EXT_VAR_DEF_NODE
+    int level;
 }node, *NODE;
 
 NODE ASTroot;
