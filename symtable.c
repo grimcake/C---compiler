@@ -3,6 +3,7 @@
 #include <string.h>
 #include "display.h"
 #include "stack.h"
+#define _SYMTABLETEST
 
 const int DX = 0;
 Stack * SymStack;
@@ -80,7 +81,7 @@ void deal_astTree(NODE T){
     stackPush(SymStack, ext_symtable);
     LEV = 0;
     Ast_To_Symtable(T);
-    stackOutput(SymStack);
+    //stackOutput(SymStack);
     //SymtableOutput(ext_symtable);
     /*while(SymStack->elemNum){
         Symtable* tmp_symtable;
@@ -101,6 +102,12 @@ void Ast_To_Symtable(NODE T){
             if(!T->ptr[0]) break;
             T->ptr[0]->offset = T->offset;
             Ast_To_Symtable(T->ptr[0]);
+
+#ifdef _SYMTABLETEST
+           // getchar();
+            //stackOutput(SymStack);
+#endif
+
             if(T->ptr[1]){
                 T->ptr[1]->offset = T->ptr[0]->offset+T->ptr[0]->width;
                 Ast_To_Symtable(T->ptr[1]);
@@ -132,11 +139,16 @@ void Ast_To_Symtable(NODE T){
             SymtableInsert(ext_symtable, T->type_id, K_FUNC, LEV, -1, T->type);
             T->offset = DX;
             LEV++;
+
+            //无论有没有参数都创建一个新的符号表
+            Symtable* new_table = SymtableCreate();
+            stackPush(SymStack, new_table);
+            now_symtable = new_table;
             //有参数
             if(T->ptr[0]){
-                Symtable* new_table = SymtableCreate();
+                /*Symtable* new_table = SymtableCreate();
                 stackPush(SymStack, new_table);
-                now_symtable = new_table;
+                now_symtable = new_table;*/
                 T->ptr[0]->offset = T->offset;
                 Ast_To_Symtable(T->ptr[0]);
                 T->width = T->ptr[0]->width;
@@ -196,7 +208,24 @@ void Ast_To_Symtable(NODE T){
                 Ast_To_Symtable(T->ptr[1]);
                 T->width += T->ptr[1]->width;
             }
-
+#ifdef _SYMTABLETEST
+            //语句块结束时将当前作用域符号表出栈
+            printf("-------------------------------------------------\n");
+            stackOutput(SymStack);
+            getchar();
+#endif
+            if(SymStack->top->pre){
+                SymStack->top = SymStack->top->pre;
+                SymStack->elemNum--;
+                now_symtable = SymStack->top->elem;
+            }
+            else{
+                now_symtable = ext_symtable;
+            }
+#ifdef _SYMTABLETEST
+            stackOutput(SymStack);
+            getchar();
+#endif
             LEV--;
             break;
         case STM_LIST_NODE:
@@ -314,7 +343,7 @@ void local_var_list(node* T){
             break;
         case ID_NODE:
             //函数无参数，直接进入compst时没有创建符号表
-            if(now_symtable == NULL){
+            if(now_symtable == NULL || now_symtable == ext_symtable){
                 now_symtable = SymtableCreate();
                 stackPush(SymStack, now_symtable);
             }
@@ -330,7 +359,27 @@ Symtable* create_new_symtable(){
     Symtable *newtable = (Symtable*)malloc(sizeof(Symtable));
     stackPush(SymStack, newtable);
     return newtable;
-} 
+}
+
+
+/*
+ * 判断表达式中的变量是否在符号表中出现
+ */
+int check_in_symtable(char s[]){
+    StackElem *tmp = SymStack->top;
+    while(tmp!=NULL){
+        s_data *tmp_date = tmp->elem->head;
+        while(tmp_date!=NULL){
+            if(!strcmp(s, tmp_date->s_name)){
+                return 1;
+            }
+            tmp_date = tmp_date->next;
+        }
+        tmp = tmp->pre;
+    }
+    return 0;
+}
+
 /*
 int main(){
     struct Symtable* s = NULL;

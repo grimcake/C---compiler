@@ -18,14 +18,14 @@ enum Symtable_kind{
     K_FUNC
 };
 
-struct s_data{    
+typedef struct s_data{    
     char s_name[33];
     int s_kind;
     int s_level;
     int s_offset;
     int s_type;
     struct s_data* next;
-};
+}s_data;
 
 typedef struct Symtable{
     struct s_data* data;
@@ -41,4 +41,6 @@ void deal_astTree(NODE T);
 void Ast_To_Symtable(NODE T);
 void var_list(node * T);
 void local_var_list(node* T);
+int check_in_symtable(char s[]);
+
 #endif
