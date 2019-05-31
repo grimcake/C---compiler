@@ -7,6 +7,7 @@
 #include "node.h"
 #endif
 
+
 typedef union{
     int type_int;
     char type_id[33];
@@ -14,6 +15,8 @@ typedef union{
 }YYLVAL;
 #define YYSTYPE YYLVAL
 %}
+
+%option yylineno
 
 INT [0-9]+
 ID [_a-zA-Z][a-zA-Z0-9]*

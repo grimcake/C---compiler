@@ -1,7 +1,7 @@
 #include "display.h"
 
 void display(NODE T, int indent){
-    //printf(" %d\n", T->kind);
+    int argsid;
     if(T){
         switch(T->kind){
         case EXT_DEF_LIST_NODE:
@@ -121,6 +121,23 @@ void display(NODE T, int indent){
             printf("%*c %s\n", indent, ' ', T->type_id);
             display(T->ptr[0], indent+3);
             display(T->ptr[1], indent+3);
+            break;
+        case FUNC_CALL_NODE:
+            printf("%*c function call: \n", indent, ' ');
+            printf("%*c function name: %s\n", indent+3, ' ', T->type_id);
+            display(T->ptr[0], indent+3);
+            break;
+        case ARGS_NODE:
+            argsid = 1;
+            while(T){
+                struct node* T0 = T->ptr[0];
+                printf("%*c %d param: \n", indent, ' ', argsid++);
+                display(T0, indent+3);
+                T = T->ptr[1];
+            }
+            printf("%*c %d param: \n", indent, ' ', argsid);
+            display(T, indent+3);
+            printf("\n");
             break;
         default:
             break;

@@ -50,6 +50,8 @@ typedef struct node {
 
     int num; //一次定义的数量，用于EXT_VAR_DEF_NODE
     int level;
+
+    int line; //行号，主要用于静态语义分析表达式和变量
 }node, *NODE;
 
 NODE ASTroot;

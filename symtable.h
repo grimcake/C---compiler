@@ -41,6 +41,6 @@ void deal_astTree(NODE T);
 void Ast_To_Symtable(NODE T);
 void var_list(node * T);
 void local_var_list(node* T);
-int check_in_symtable(char s[]);
+int check_in_symtable(char *s);
 
 #endif

@@ -95,7 +95,7 @@ void deal_astTree(NODE T){
  * 根据文法处理各层节点属性
  */
 void Ast_To_Symtable(NODE T){
-
+    int tmp_res;
     if(T){
         switch(T->kind){
         case EXT_DEF_LIST_NODE:
@@ -136,6 +136,10 @@ void Ast_To_Symtable(NODE T){
             break;
 
         case FUNC_DEC_NODE:
+            tmp_res = check_in_symtable(T->type_id);
+            if(tmp_res == 1){
+                printf("Error at line %d: function \'%s\' Redefined \n", T->line, T->type_id);
+            }
             SymtableInsert(ext_symtable, T->type_id, K_FUNC, LEV, -1, T->type);
             T->offset = DX;
             LEV++;
@@ -260,6 +264,10 @@ void Ast_To_Symtable(NODE T){
         case DEC_LIST_NODE:
             break;
         case ID_NODE:
+            tmp_res = check_in_symtable(T->type_id);
+            if(tmp_res == 0){
+                printf("Error at line %d: undefined variable \'%s\' \n", T->line, T->type_id);
+            }
             break;
         case INT_NODE:
             break;
@@ -271,6 +279,8 @@ void Ast_To_Symtable(NODE T){
         case MINUS_NODE:
         case STAR_NODE:
         case DIV_NODE:
+            Ast_To_Symtable(T->ptr[0]);
+            Ast_To_Symtable(T->ptr[1]);
             break;
         default:
             break;
@@ -347,6 +357,10 @@ void local_var_list(node* T){
                 now_symtable = SymtableCreate();
                 stackPush(SymStack, now_symtable);
             }
+            int tmp_res = check_in_now_symtable(T->type_id);
+            if(tmp_res == 1){
+                printf("Error at line %d: variable \'%s\' Redefined\n", T->line, T->type_id);
+            }
             SymtableInsert(now_symtable, T->type_id, K_VAL, LEV, T->offset, T->type);
             T->num = 1;
             break;
@@ -365,7 +379,7 @@ Symtable* create_new_symtable(){
 /*
  * 判断表达式中的变量是否在符号表中出现
  */
-int check_in_symtable(char s[]){
+int check_in_symtable(char *s){
     StackElem *tmp = SymStack->top;
     while(tmp!=NULL){
         s_data *tmp_date = tmp->elem->head;
@@ -379,6 +393,18 @@ int check_in_symtable(char s[]){
     }
     return 0;
 }
+
+int check_in_now_symtable(char *s){
+    s_data *tmp_date = SymStack->top->elem->head;
+    while(tmp_date!=NULL){
+        if(!strcmp(s, tmp_date->s_name)){
+            return 1;
+        }
+        tmp_date = tmp_date->next;
+    }
+    return 0;
+}
+
 
 /*
 int main(){
