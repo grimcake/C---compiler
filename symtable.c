@@ -284,7 +284,7 @@ void local_var_list(node* T){
             local_var_list(T->ptr[0]);
             T->width += T->ptr[0]->width;
             if(T->ptr[1]){
-                T->ptr[1]->offset = T->ptr[0]->offset+T->ptr[0]->width;
+                T->ptr[1]->offset = T->offset+T->ptr[0]->width;
                 local_var_list(T->ptr[1]);
             }
             break;
