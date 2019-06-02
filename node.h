@@ -48,7 +48,7 @@ typedef struct node {
     int width;
     int type;
 
-    int num; //一次定义的数量，用于EXT_VAR_DEF_NODE
+    int num; //一次定义的数量，用于EXT_VAR_DEF_NODE,或函数参数列表的数量
     int level;
 
     int line; //行号，主要用于静态语义分析表达式和变量

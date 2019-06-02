@@ -24,6 +24,7 @@ typedef struct s_data{
     int s_level;
     int s_offset;
     int s_type;
+    int s_num; //参数个数，用于函数
     struct s_data* next;
 }s_data;
 
@@ -34,13 +35,13 @@ typedef struct Symtable{
 }Symtable;
 
 struct Symtable* SymtableCreate();
-void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type);
+void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type, int num);
 void SymtableOutput(struct Symtable *s);
 void SymtableDestroy(Symtable* s);
 void deal_astTree(NODE T);
 void Ast_To_Symtable(NODE T);
 void var_list(node * T);
 void local_var_list(node* T);
-int check_in_symtable(char *s);
-
+int check_in_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
+int check_in_now_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
 #endif

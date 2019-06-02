@@ -10,6 +10,9 @@ Stack * SymStack;
 struct Symtable* ext_symtable; //外部变量符号表
 static int LEV;  //当前层
 static Symtable* now_symtable; //当前作用域的符号表
+int tmp_kind, tmp_level, tmp_offset, tmp_type, tmp_num; //查表时返回的内容
+
+int args_num = 0;
 /*
  * 符号表创建
  */
@@ -28,7 +31,7 @@ struct Symtable* SymtableCreate(){
 /*
  * 符号表插入一条记录
  */
-void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type){
+void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type, int num){
     struct s_data* newnode;
     newnode = (struct s_data*)malloc(sizeof(struct s_data));
     strcpy(newnode->s_name, name);
@@ -36,6 +39,7 @@ void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int o
     newnode->s_level = level;
     newnode->s_offset = offset;
     newnode->s_type = type;
+    newnode->s_num = num;
     if(s->tail == NULL){
         s->head = s->tail = newnode;
     }
@@ -52,10 +56,10 @@ void SymtableOutput(struct Symtable *s){
     struct s_data* p = NULL;
     if(s == NULL) return;
     p = s->head;
-    printf("name\tkind\tlevel\toffset\ttype\n");
+    printf("name\tkind\tlevel\toffset\ttype\tnum\n");
     while(p)
     {
-        printf("%s\t%d\t%d\t%d\t%d\n", p->s_name, p->s_kind, p->s_level, p->s_offset, p->s_type);
+        printf("%s\t%d\t%d\t%d\t%d\t%d\n", p->s_name, p->s_kind, p->s_level, p->s_offset, p->s_type, p->s_num);
         if(p == s->tail){
             break;
         }
@@ -96,6 +100,10 @@ void deal_astTree(NODE T){
  */
 void Ast_To_Symtable(NODE T){
     int tmp_res;
+    char tmp_name[33];
+    Symtable* tmp_table;
+
+
     if(T){
         switch(T->kind){
         case EXT_DEF_LIST_NODE:
@@ -136,11 +144,11 @@ void Ast_To_Symtable(NODE T){
             break;
 
         case FUNC_DEC_NODE:
-            tmp_res = check_in_symtable(T->type_id);
+            tmp_res = check_in_symtable(T->type_id, &tmp_kind, &tmp_level, &tmp_offset, &tmp_type, &tmp_num);
             if(tmp_res == 1){
                 printf("Error at line %d: function \'%s\' Redefined \n", T->line, T->type_id);
             }
-            SymtableInsert(ext_symtable, T->type_id, K_FUNC, LEV, -1, T->type);
+        
             T->offset = DX;
             LEV++;
 
@@ -156,11 +164,14 @@ void Ast_To_Symtable(NODE T){
                 T->ptr[0]->offset = T->offset;
                 Ast_To_Symtable(T->ptr[0]);
                 T->width = T->ptr[0]->width;
+                T->num = T->ptr[0]->num;
             }
             else{
                 T->width = 0;
+                T->num = 0;
             }
             LEV--; //参数和块语句同级，但是在compst才是真正的加
+            SymtableInsert(ext_symtable, T->type_id, K_FUNC, LEV, -1, T->type, T->num);
             break;
         case PARAM_LIST_NODE:
             T->ptr[0]->offset = T->offset;
@@ -186,6 +197,7 @@ void Ast_To_Symtable(NODE T){
             
             local_var_list(T->ptr[1]);
             T->width = T->ptr[1]->num*((T->type == S_INT)? 4:8);
+            T->num = 1;
             break;
         case EXP_STMT_NODE:
             T->ptr[0]->offset = T->offset;
@@ -264,7 +276,7 @@ void Ast_To_Symtable(NODE T){
         case DEC_LIST_NODE:
             break;
         case ID_NODE:
-            tmp_res = check_in_symtable(T->type_id);
+            tmp_res = check_in_symtable(T->type_id, &tmp_kind, &tmp_level, &tmp_offset, &tmp_type, &tmp_num);
             if(tmp_res == 0){
                 printf("Error at line %d: undefined variable \'%s\' \n", T->line, T->type_id);
             }
@@ -281,6 +293,28 @@ void Ast_To_Symtable(NODE T){
         case DIV_NODE:
             Ast_To_Symtable(T->ptr[0]);
             Ast_To_Symtable(T->ptr[1]);
+            break;
+        case FUNC_CALL_NODE:
+            tmp_res = check_in_symtable(T->type_id, &tmp_kind, &tmp_level, &tmp_offset, &tmp_type, &tmp_num);
+            if(tmp_res == 0){
+                printf("Error at line %d: undefined function \'%s\'\n", T->line, T->type_id);
+                break;
+            }
+            if(T->ptr[0]!=NULL){
+                Ast_To_Symtable(T->ptr[0]);
+            }
+            if(args_num != tmp_num){
+                printf("Error at line %d: arguments num error \'%s\'\n", T->line, T->type_id);
+            }
+            args_num = 0;
+
+            break;
+        case ARGS_NODE:
+            while(T){
+                struct node* T0 = T->ptr[0];
+                T = T->ptr[1];
+                args_num++;
+            }
             break;
         default:
             break;
@@ -307,7 +341,7 @@ void var_list(node * T){
             }
             break;
         case ID_NODE:
-            SymtableInsert(ext_symtable, T->type_id, K_VAL, LEV, T->offset, T->type);
+            SymtableInsert(ext_symtable, T->type_id, K_VAL, LEV, T->offset, T->type, 0);
             T->num = 1;
             break;
         default:
@@ -357,11 +391,11 @@ void local_var_list(node* T){
                 now_symtable = SymtableCreate();
                 stackPush(SymStack, now_symtable);
             }
-            int tmp_res = check_in_now_symtable(T->type_id);
+            int tmp_res = check_in_now_symtable(T->type_id, &tmp_kind, &tmp_level, &tmp_offset, &tmp_type, &tmp_num);
             if(tmp_res == 1){
                 printf("Error at line %d: variable \'%s\' Redefined\n", T->line, T->type_id);
             }
-            SymtableInsert(now_symtable, T->type_id, K_VAL, LEV, T->offset, T->type);
+            SymtableInsert(now_symtable, T->type_id, K_VAL, LEV, T->offset, T->type, 0);
             T->num = 1;
             break;
         default:
@@ -379,12 +413,17 @@ Symtable* create_new_symtable(){
 /*
  * 判断表达式中的变量是否在符号表中出现
  */
-int check_in_symtable(char *s){
+int check_in_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num){
     StackElem *tmp = SymStack->top;
     while(tmp!=NULL){
         s_data *tmp_date = tmp->elem->head;
         while(tmp_date!=NULL){
             if(!strcmp(s, tmp_date->s_name)){
+                *kind = tmp_date->s_kind;
+                *level = tmp_date->s_level;
+                *offset = tmp_date->s_offset;
+                *type = tmp_date->s_type;
+                *num = tmp_date->s_num;
                 return 1;
             }
             tmp_date = tmp_date->next;
@@ -394,10 +433,19 @@ int check_in_symtable(char *s){
     return 0;
 }
 
-int check_in_now_symtable(char *s){
+/*
+ * 判断是否在当前作用域符号表中出现，用于判断redefine错误
+ */
+
+int check_in_now_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num){
     s_data *tmp_date = SymStack->top->elem->head;
     while(tmp_date!=NULL){
         if(!strcmp(s, tmp_date->s_name)){
+            *kind = tmp_date->s_kind;
+            *level = tmp_date->s_level;
+            *offset = tmp_date->s_offset;
+            *type = tmp_date->s_type;
+            *num = tmp_date->s_num;
             return 1;
         }
         tmp_date = tmp_date->next;
