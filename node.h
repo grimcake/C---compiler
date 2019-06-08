@@ -1,5 +1,6 @@
 #ifndef _NODE_H
 #define _NODE_H
+#include "symtable.h"
 
 enum node_kind{
     ID_NODE,
@@ -52,8 +53,20 @@ typedef struct node {
     int level;
 
     int line; //行号，主要用于静态语义分析表达式和变量
+
+    struct s_data* place;
+    char Etrue[15], Efalse[15];
+    char Snext[15];
+    struct codenode* code;
+    char op[10];
 }node, *NODE;
 
 NODE ASTroot;
+
+
+
+
+
+
 
 #endif

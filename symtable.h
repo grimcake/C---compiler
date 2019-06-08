@@ -42,6 +42,6 @@ void deal_astTree(NODE T);
 void Ast_To_Symtable(NODE T);
 void var_list(node * T);
 void local_var_list(node* T);
-int check_in_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
-int check_in_now_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
+s_data* check_in_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
+s_data* check_in_now_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
 #endif
