@@ -4,7 +4,6 @@
 #include "stdlib.h"
 #include <stdio.h>
 
-
 enum Symtable_type{
     S_TEST,
     S_INT,
@@ -37,11 +36,4 @@ typedef struct Symtable{
 struct Symtable* SymtableCreate();
 void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type, int num);
 void SymtableOutput(struct Symtable *s);
-void SymtableDestroy(Symtable* s);
-void deal_astTree(NODE T);
-void Ast_To_Symtable(NODE T);
-void var_list(node * T);
-void local_var_list(node* T);
-s_data* check_in_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
-s_data* check_in_now_symtable(char *s, int* kind, int* level, int* offset, int* type, int* num);
 #endif

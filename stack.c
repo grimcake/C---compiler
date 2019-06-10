@@ -16,7 +16,6 @@ void stackDestroy(Stack* s){
     while(p){
         StackElem* tmp = p;
         p = p->next;
-        SymtableDestroy(tmp->elem);
         free(tmp);
     }
     free(s);

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "node.h"
 #include "symtable.h"
+#include "astTreeAction.h"
 
 extern FILE* yyin;
 extern int yylex(void);

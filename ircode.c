@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "symtable.h"
+
 
 char* strcat0(char* s1, char* s2){
     static char result[10];
@@ -142,9 +144,6 @@ void printIR(struct codenode* head){
         h = h->next;
     }while(h != head);
 }
-
-
-
 
 
 

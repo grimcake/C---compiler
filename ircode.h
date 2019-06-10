@@ -55,5 +55,6 @@ struct codenode* genLabel(char* label);
 struct codenode* genGoto(char* label);
 struct codenode* merge(int num, ...);
 void printIR(struct codenode* head);
+void Exp(struct node *T);
 
 #endif
