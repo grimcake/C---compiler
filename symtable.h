@@ -14,7 +14,8 @@ enum Symtable_type{
 enum Symtable_kind{
     K_TEST,
     K_VAL,
-    K_FUNC
+    K_FUNC,
+    K_TEMP
 };
 
 typedef struct s_data{    
@@ -24,6 +25,7 @@ typedef struct s_data{
     int s_offset;
     int s_type;
     int s_num; //参数个数，用于函数
+    char alias[33]; //别名
     struct s_data* next;
 }s_data;
 
@@ -34,6 +36,7 @@ typedef struct Symtable{
 }Symtable;
 
 struct Symtable* SymtableCreate();
-void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type, int num);
+s_data* SymtableInsert(struct Symtable *s,  char name[], char *alias, int kind, int level, int offset, int type, int num);
+s_data* SymtableInsertTemp(struct Symtable *s,  char *alias, int kind, int level, int offset, int type, int num);
 void SymtableOutput(struct Symtable *s);
 #endif

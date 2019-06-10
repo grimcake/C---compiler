@@ -3,6 +3,7 @@
 #include "node.h"
 #include "symtable.h"
 #include "astTreeAction.h"
+#include "ircode.h"
 
 extern FILE* yyin;
 extern int yylex(void);
@@ -19,5 +20,6 @@ int main(int argc, char** argv){
     yyrestart(yyin);
     yyparse();
     deal_astTree(ASTroot);
+    printIR(ASTroot->code);
     return 0;
 }

@@ -98,6 +98,7 @@ void printIR(struct codenode* head){
         if(h->opn2.kind == ID){
             sprintf(opnstr2, "%s", h->opn2.id);
         }
+        sprintf(resultstr, "%s", h->result.id);
 
         switch(h->op){
         case ASSIGNOP:printf(" %s:=%s\n", resultstr, opnstr1);

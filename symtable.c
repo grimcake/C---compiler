@@ -24,10 +24,11 @@ struct Symtable* SymtableCreate(){
 /*
  * 符号表插入一条记录
  */
-void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int offset, int type, int num){
+s_data* SymtableInsert(struct Symtable *s,  char name[], char *alias, int kind, int level, int offset, int type, int num){
     struct s_data* newnode;
     newnode = (struct s_data*)malloc(sizeof(struct s_data));
     strcpy(newnode->s_name, name);
+    strcpy(newnode->alias, alias);
     newnode->s_kind = kind;
     newnode->s_level = level;
     newnode->s_offset = offset;
@@ -40,8 +41,32 @@ void SymtableInsert(struct Symtable *s,  char name[], int kind, int level, int o
         s->tail->next = newnode;
         s->tail = s->tail->next;
     }
+    return newnode;
 }
 
+
+/*
+ * 符号表中插入临时变量
+ */
+s_data* SymtableInsertTemp(struct Symtable *s,  char *alias, int kind, int level, int offset, int type, int num){
+    struct s_data* newnode;
+    newnode = (struct s_data*)malloc(sizeof(struct s_data));
+    strcpy(newnode->s_name, "");
+    strcpy(newnode->alias, alias);
+    newnode->s_kind = kind;
+    newnode->s_level = level;
+    newnode->s_offset = offset;
+    newnode->s_type = type;
+    newnode->s_num = num;
+    if(s->tail == NULL){
+        s->head = s->tail = newnode;
+    }
+    else{
+        s->tail->next = newnode;
+        s->tail = s->tail->next;
+    }
+    return newnode;
+}
 /*
  * 输出符号表
  */
@@ -49,10 +74,10 @@ void SymtableOutput(struct Symtable *s){
     struct s_data* p = NULL;
     if(s == NULL) return;
     p = s->head;
-    printf("name\tkind\tlevel\toffset\ttype\tnum\n");
+    printf("name\talias\tkind\tlevel\toffset\ttype\tnum\n");
     while(p)
     {
-        printf("%s\t%d\t%d\t%d\t%d\t%d\n", p->s_name, p->s_kind, p->s_level, p->s_offset, p->s_type, p->s_num);
+        printf("%s\t%s\t%d\t%d\t%d\t%d\t%d\n", p->s_name, p->alias, p->s_kind, p->s_level, p->s_offset, p->s_type, p->s_num);
         if(p == s->tail){
             break;
         }
