@@ -159,13 +159,14 @@ void Ast_To_Symtable(NODE T){
             LEV++;
             T->width = 0;
             T->code = NULL;
+            //不管有没有变量定义部分都要创建新符号表，因为之后表达式中的临时变量需要放在新作用域中
+            if(LEV > 1){
+                Symtable * new_table = SymtableCreate(); //创建新作用域符号表
+                stackPush(SymStack, new_table); //将符号表入栈
+                now_symtable = new_table;
+            }
             if(T->ptr[0]){
                 T->ptr[0]->offset = T->offset;
-                if(LEV > 1){
-                    Symtable * new_table = SymtableCreate(); //创建新作用域符号表
-                    stackPush(SymStack, new_table); //将符号表入栈
-                    now_symtable = new_table;
-                }
                 local_var_list(T->ptr[0]);
                 T->width += T->ptr[0]->width;
                 T->code = T->ptr[0]->code;
@@ -225,15 +226,37 @@ void Ast_To_Symtable(NODE T){
             }
             break;
         case WHILE_NODE:
+            strcpy(T->ptr[0]->Etrue, newLabel());
+            strcpy(T->ptr[0]->Efalse, T->Snext);
             T->ptr[0]->offset = T->ptr[1]->offset = T->offset;
+            boolExp(T->ptr[0]);
             T->width = T->ptr[0]->width;
+            strcpy(T->ptr[1]->Snext, newLabel());
             Ast_To_Symtable(T->ptr[1]);
+            if(T->width<T->ptr[1]->width){
+                T->width = T->ptr[1]->width;
+            }
+            T->code = merge(5, genLabel(T->ptr[1]->Snext), T->ptr[0]->code, genLabel(T->ptr[0]->Etrue), T->ptr[1]->code, genGoto(T->ptr[1]->Snext));
             break;
         case IF_THEN_ELSE_NODE:
+            strcpy(T->ptr[0]->Etrue, newLabel());
+            strcpy(T->ptr[0]->Efalse, newLabel());
+            T->ptr[0]->offset = T->offset;
             T->ptr[1]->offset = T->offset;
             T->ptr[2]->offset = T->offset;
+            boolExp(T->ptr[0]);
+            T->width = T->ptr[0]->width;
+            strcpy(T->ptr[1]->Snext, T->Snext);
             Ast_To_Symtable(T->ptr[1]);
+            if(T->width<T->ptr[1]->width){
+                T->width = T->ptr[1]->width;
+            }
+            strcpy(T->ptr[2]->Snext, T->Snext);
             Ast_To_Symtable(T->ptr[2]);
+            if(T->width<T->ptr[2]->width){
+                T->width = T->ptr[2]->width;
+            }
+            T->code = merge(6, T->ptr[0]->code, genLabel(T->ptr[0]->Etrue), T->ptr[1]->code, genGoto(T->Snext), genLabel(T->ptr[0]->Efalse), T->ptr[2]->code);
             break;
         case DEF_LIST_NODE:
             break;
@@ -430,7 +453,8 @@ void Exp(node *T)
     int op_kind;
     if(T){
         switch(T->kind){
-        case ID_NODE: rtn = check_in_now_symtable(SymStack, T->type_id, &find_kind, &find_level, &find_offset, &find_type, &find_num);
+        case ID_NODE: rtn = check_in_symtable(SymStack, T->type_id, &find_kind, &find_level, &find_offset, &find_type, &find_num);
+                      SymtableOutput(now_symtable);
                       if(rtn == NULL){
                           //表达式中出现的标识符不在符号表内
                           printf("EError at line %d: undefined variable \'%s\' \n", T->line, T->type_id);
@@ -520,6 +544,7 @@ void boolExp(node *T){
     opn opn1, opn2, result;
     int op;
     s_data* rtn;
+    int find_kind, find_level, find_offset, find_type, find_num;
     if(T){
         switch(T->kind){
         case INT_NODE: if(T->type_int != 0){
@@ -530,7 +555,49 @@ void boolExp(node *T){
                        }
                        T->width = 0;
                        break;
-                    
+        case ID_NODE: rtn = check_in_symtable(SymStack, T->type_id, &find_kind, &find_level, &find_offset, &find_type, &find_num);
+                      if(rtn == NULL){
+                          printf("Error at line %d: undefined variable \'%s\' \n", T->line, T->type_id);
+                      }
+                      opn1.kind = ID;
+                      strcpy(opn1.id, rtn->alias);
+                      opn1.offset = rtn->s_offset;
+
+                      opn2.kind = INT;
+                      opn2.const_int = 0;
+                      
+                      result.kind = ID;
+                      strcpy(result.id, T->Etrue);
+
+                      T->code = genIR(NEQ, opn1, opn2, result);
+                      T->code = merge(2, T->code, genGoto(T->Efalse));
+                      T->width = 0;
+                      break;
+        case RELOP_NODE: T->ptr[0]->offset = T->ptr[1]->offset = T->offset;
+                         Exp(T->ptr[0]);
+                         T->width = T->ptr[0]->width;
+                         Exp(T->ptr[1]);
+                         if(T->width<T->ptr[1]->width) T->width = T->ptr[1]->width;
+                         opn1.kind = ID;
+                         strcpy(opn1.id, T->ptr[0]->place->alias);
+                         opn1.offset = T->ptr[0]->place->s_offset;
+
+                         opn2.kind = ID;
+                         strcpy(opn2.id, T->ptr[1]->place->alias);
+                         opn2.offset = T->ptr[1]->place->s_offset;
+
+                         result.kind = ID;
+                         strcpy(result.id, T->Etrue);
+                         if(strcmp(T->type_id, "<") == 0) op = JLT;
+                         else if(strcmp(T->type_id, "<=") == 0) op = JLE;
+                         else if(strcmp(T->type_id, ">") == 0) op = JGT;
+                         else if(strcmp(T->type_id, ">=") == 0) op = JGE;
+                         else if(strcmp(T->type_id, "==") == 0) op = EQ;
+                         else if(strcmp(T->type_id, "!=") == 0) op = NEQ;
+                         T->code = genIR(op, opn1, opn2, result);
+                         T->code = merge(4, T->ptr[0]->code, T->ptr[1]->code, T->code, genGoto(T->Efalse));
+                         break;
+
         }
     }
 }

@@ -53,6 +53,14 @@ struct codenode* genLabel(char* label){
     return h;
 }
 
+struct codenode* genGoto(char* label){
+    struct codenode* h = (struct codenode*)malloc(sizeof(struct codenode));
+    h->op = GOTO;
+    strcpy(h->result.id, label);
+    h->next = h->pre = h;
+    return h;
+}
+
 struct codenode* merge(int num, ...){
     struct codenode *h1, *h2, *p, *t1, *t2;
     va_list ap;
